@@ -1,0 +1,20 @@
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+
+  mqtt-subscriber:
+    build: ./mqtt-subscriber
+    container_name: mqtt-subscriber
+    depends_on:
+      - mongo
+
+  bokeh:
+    build: ./bokeh
+    container_name: bokeh
+    ports:
+      - "5006:5006"
+    depends_on:
+      - mongo
