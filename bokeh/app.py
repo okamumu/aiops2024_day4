@@ -6,10 +6,11 @@ import random
 import time
 from pymongo import MongoClient
 
+client = MongoClient('mongodb://mongo:27017/')
+db = client['sample']
+collection = db['test']
+
 # データソースの作成
-xdata = []
-y1data = []
-y2data = []
 source1 = ColumnDataSource(data=dict(x=[], y=[]))
 source2 = ColumnDataSource(data=dict(x=[], y=[]))
 
@@ -22,16 +23,14 @@ plot2.line('x', 'y', source=source2)
 
 # データの更新関数
 def update():
-  # データの追加．100個以上ある場合は古いデータを削除
-  if len(xdata) > 100:
-    xdata.pop(0)
-    y1data.pop(0)
-    y2data.pop(0)
-  xdata.append(time.time())
-  y1data.append(random.random())
-  y2data.append(random.random())
-  source1.data = dict(x=xdata, y=y1data)
-  source2.data = dict(x=xdata, y=y2data)
+  cursor = collection.find({'location': 'room 1'}).sort('timestamp', -1).limit(100)
+  documents = list(cursor)
+  documents.reverse()
+  x = [float(doc['timestamp']) for doc in documents]
+  y1 = [doc['temperature'] for doc in documents]
+  y2 = [doc['humidity'] for doc in documents]
+  source1.data = dict(x=x, y=y1)
+  source2.data = dict(x=x, y=y2)
 
 # Bokehのドキュメントにコールバックを追加（1000ミリ秒ごとに更新）
 curdoc().add_periodic_callback(update, 1000)

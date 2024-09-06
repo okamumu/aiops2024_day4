@@ -2,8 +2,6 @@ services:
   mongo:
     image: mongo
     container_name: mongo
-    ports:
-      - "27017:27017"
 
   mqtt-subscriber:
     build: ./mqtt-subscriber
